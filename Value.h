@@ -1,3 +1,6 @@
+#ifndef VALUE_H
+#define VALUE_H
+
 #include <iostream>
 #include <memory>
 #include <set>
@@ -34,11 +37,11 @@ public:
         return out;
     }
 
-    std::shared_ptr<Value> operator^(double other) {
-        assert(other == static_cast<int>(other) || other == static_cast<float>(other) || other == static_cast<double>(other));
-        auto out = std::make_shared<Value>(std::pow(data, other), std::set<std::shared_ptr<Value>>{shared_from_this()}, "**" + std::to_string(other));
-        out->_backward = [this, other, out] {
-            this->grad += (other * std::pow(data, other - 1)) * out->grad;
+    std::shared_ptr<Value> pow(double exponent) {
+        assert(exponent == static_cast<int>(exponent) || exponent == static_cast<float>(exponent) || exponent == static_cast<double>(exponent));
+        auto out = std::make_shared<Value>(std::pow(data, exponent), std::set<std::shared_ptr<Value>>{shared_from_this()}, "**" + std::to_string(exponent));
+        out->_backward = [this, exponent, out] {
+            this->grad += (exponent * std::pow(data, exponent - 1)) * out->grad;
         };
         return out;
     }
@@ -79,7 +82,7 @@ public:
     }
 
     std::shared_ptr<Value> operator-(const std::shared_ptr<Value>& other) {
-        return (*this) + (-*other);
+        return (*this) + (-other);
     }
 
     std::shared_ptr<Value> operator-(double other) {
@@ -91,7 +94,7 @@ public:
     }
 
     std::shared_ptr<Value> operator/(const std::shared_ptr<Value>& other) {
-        return (*this) * ((*other) ^ -1);
+        return (*this) * other->pow(-1);
     }
 
     std::shared_ptr<Value> operator/(double other) {
@@ -99,6 +102,10 @@ public:
     }
 
     // Overload the operators for shared_ptr<Value>
+    friend std::shared_ptr<Value> operator-(const std::shared_ptr<Value>& l) {
+        return l->operator-();
+    }
+
     friend std::shared_ptr<Value> operator+(const std::shared_ptr<Value>& lhs, const std::shared_ptr<Value>& rhs) {
         return lhs->operator+(rhs);
     }
@@ -131,19 +138,31 @@ public:
         return std::make_shared<Value>(lhs) / rhs;
     }
 
+    friend std::shared_ptr<Value> operator+(const std::shared_ptr<Value>& lhs, double rhs) {
+        return lhs + std::make_shared<Value>(rhs);
+    }
+
+    friend std::shared_ptr<Value> operator-(const std::shared_ptr<Value>& lhs, double rhs) {
+        return lhs - std::make_shared<Value>(rhs);
+    }
+
+    friend std::shared_ptr<Value> operator*(const std::shared_ptr<Value>& lhs, double rhs) {
+        return lhs * std::make_shared<Value>(rhs);
+    }
+
+    friend std::shared_ptr<Value> operator/(const std::shared_ptr<Value>& lhs, double rhs) {
+        return lhs / std::make_shared<Value>(rhs);
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const Value& v) {
         os << "Value(data=" << v.data << ", grad=" << v.grad << ")";
         return os;
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const std::shared_ptr<Value>& v) {
+        os << "Value(data=" << v->data << ", grad=" << v->grad << ")" << std::endl;
+        return os;
+    }
 };
 
-
-
-int main() {
-    auto a = std::make_shared<Value>(2.0);
-    auto b = std::make_shared<Value>(3.0);
-    auto c = a + b;  // Now this works
-    std::cout << *c << std::endl;
-    c->backward();
-    std::cout << *a << " " << *b << std::endl;
-}
+#endif // VALUE_H

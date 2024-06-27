@@ -8,4 +8,4 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add the executable
-add_executable(Micrograd engine.cpp)
+add_executable(Micrograd test_Value.cpp)
