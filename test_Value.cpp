@@ -9,9 +9,8 @@ void test_sanity_check() {
     y->backward();
     auto xmg = x, ymg = y;
 
-    std::cout << x << z << q << h << y << std::endl;
-    assert(ymg->data == -34.0);
-    assert(xmg->grad == -46.0);
+    assert(ymg->data == -20.0);
+    assert(xmg->grad == 46.0);
 }
 
 void test_more_ops() {
@@ -33,7 +32,7 @@ void test_more_ops() {
     double tol = 1e-6;
     assert(std::abs(gmg->data - 24.70408163265306) < tol);
     assert(std::abs(amg->grad - 138.8338192419825) < tol);
-    assert(std::abs(bmg->grad - 645.5773207547171) < tol);
+    assert(std::abs(bmg->grad - 645.5772594752186) < tol);
 }
 
 void test_duplicate_backprop() {

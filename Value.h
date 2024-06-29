@@ -155,7 +155,7 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Value& v) {
-        os << "Value(data=" << v.data << ", grad=" << v.grad << ")";
+        os << "Value(data=" << v.data << ", grad=" << v.grad << ")" << std::endl;
         return os;
     }
 
